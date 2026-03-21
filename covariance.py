@@ -86,5 +86,5 @@ except Exception as e:
 # --- Footer ---
 st.markdown("---")
 st.markdown("""
-*Data Source: [Yahoo Finance](https://finance.yahoo.com) | App by [Your Name]*
+*Data Source: [Yahoo Finance](https://finance.yahoo.com) | App by Bhavin K. Moriya*
 """)
