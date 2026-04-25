@@ -1,7 +1,6 @@
 # file: streamlit_trainer.py
 import time
 import random
-import numpy as np
 import polars as pl
 import streamlit as st
 
@@ -17,25 +16,26 @@ def gen_question(level):
         b = random.choice([19, 25, 49, 99])
     return a, b, a * b
 
-def run_session(n=20):
-    level = 2
-    records = []
-    st.session_state.records = records
+def reset_session():
+    st.session_state.records = []
     st.session_state.current_question = 0
-    st.session_state.level = level
+    st.session_state.level = 2
+    st.session_state.session_started = True
 
-    if "records" not in st.session_state:
-        st.session_state.records = []
+def run_session(n=20):
+    if "session_started" not in st.session_state:
+        reset_session()
 
     if st.session_state.current_question < n:
-        a, b, ans = gen_question(st.session_state.level)
-        st.session_state.current_a = a
-        st.session_state.current_b = b
-        st.session_state.current_ans = ans
-        st.session_state.start_time = time.time()
+        if "current_a" not in st.session_state:
+            a, b, ans = gen_question(st.session_state.level)
+            st.session_state.current_a = a
+            st.session_state.current_b = b
+            st.session_state.current_ans = ans
+            st.session_state.start_time = time.time()
 
         st.write(f"### Question {st.session_state.current_question + 1}/{n}")
-        st.write(f"**{a} x {b} = ?**")
+        st.write(f"**{st.session_state.current_a} x {st.session_state.current_b} = ?**")
 
         user_input = st.text_input("Your answer:", key=f"input_{st.session_state.current_question}")
 
@@ -98,4 +98,7 @@ if __name__ == "__main__":
     st.write("Answer the multiplication questions as fast as you can!")
     n_questions = st.slider("Number of questions:", 5, 50, 20)
     if st.button("Start Session"):
+        reset_session()
+        run_session(n_questions)
+    elif "session_started" in st.session_state:
         run_session(n_questions)
