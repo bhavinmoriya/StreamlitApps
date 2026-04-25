@@ -21,6 +21,10 @@ def reset_session():
     st.session_state.current_question = 0
     st.session_state.level = 2
     st.session_state.session_started = True
+    # Clear current question state
+    for key in ["current_a", "current_b", "current_ans", "start_time"]:
+        if key in st.session_state:
+            del st.session_state[key]
 
 def run_session(n=20):
     if "session_started" not in st.session_state:
@@ -63,6 +67,11 @@ def run_session(n=20):
                     st.session_state.level = min(3, st.session_state.level + 1)
                 elif not correct:
                     st.session_state.level = max(1, st.session_state.level - 1)
+
+                # Clear current question state to generate a new one
+                for key in ["current_a", "current_b", "current_ans", "start_time"]:
+                    if key in st.session_state:
+                        del st.session_state[key]
 
                 st.session_state.current_question += 1
                 st.rerun()
