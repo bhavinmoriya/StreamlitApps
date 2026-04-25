@@ -8,6 +8,7 @@ dependencies = [
     "matplotlib>=3.10.8",
     "numpy>=2.4.3",
     "pandas>=2.3.3",
+    "polars>=1.40.1",
     "seaborn>=0.13.2",
     "streamlit>=1.55.0",
     "yfinance>=1.2.0",
