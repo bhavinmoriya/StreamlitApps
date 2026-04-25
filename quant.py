@@ -3,7 +3,6 @@ import time
 import random
 import polars as pl
 import streamlit as st
-from streamlit.components.v1 import html
 
 def gen_question(level):
     if level == 1:
@@ -22,21 +21,10 @@ def reset_session():
     st.session_state.current_question = 0
     st.session_state.level = 2
     st.session_state.session_started = True
+    # Clear current question state
     for key in ["current_a", "current_b", "current_ans", "start_time"]:
         if key in st.session_state:
             del st.session_state[key]
-
-def focus_input():
-    # JavaScript to focus the input box
-    js = """
-    <script>
-        var input = document.querySelector('input[type="text"]');
-        if (input) {
-            input.focus();
-        }
-    </script>
-    """
-    html(js)
 
 def run_session(n=20):
     if "session_started" not in st.session_state:
@@ -54,9 +42,6 @@ def run_session(n=20):
         st.write(f"**{st.session_state.current_a} x {st.session_state.current_b} = ?**")
 
         user_input = st.text_input("Your answer:", key=f"input_{st.session_state.current_question}")
-
-        # Auto-focus the input box
-        focus_input()
 
         if user_input:
             try:
