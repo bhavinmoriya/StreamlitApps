@@ -4,18 +4,18 @@ import cv2
 import matplotlib.pyplot as plt
 from io import BytesIO
 
-Set page title and layout
+# Set page title and layout
 
 st.set_page_config(page_title="DCT & Wavelet Transform Visualizer", layout="wide")
 
-Title
+# Title
 
 st.title("🖼️ DCT & Wavelet Transform Visualizer")
 st.markdown("Upload an image to apply Discrete Cosine Transform (DCT) and visualize the results.")
 
 
 
-File uploader
+# File uploader
 
 uploaded_file = st.file_uploader(
     "Choose an image...",
@@ -97,7 +97,7 @@ else:
             mime="image/png"
         )
 
-Footer
+# Footer
 
 st.markdown("---")
 st.markdown(
