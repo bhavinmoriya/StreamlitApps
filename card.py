@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 
 def card_benefit(spend=9000, return_percentage=1.25, fees=0):
     cashback = spend * return_percentage / 100
@@ -23,5 +24,34 @@ with tab1:
 
 with tab2:
     st.header("📊 Detailed Analysis")
-    st.write("Compare different cards and scenarios...")
+    # st.write("Compare different cards and scenarios...")
     # Add comparison charts or additional calculations here
+    st.header("📊 Card Comparison")
+    
+    # Define card options
+    cards = [
+        {"Name": "Card 1", "Spend": 9000, "Return %": 1.25, "Fees": 0},
+        {"Name": "Card 2", "Spend": 10000, "Return %": 1.7, "Fees": 50},
+        {"Name": "Card 3", "Spend": 12000, "Return %": 1.8, "Fees": 100}
+    ]
+
+    # Calculate benefits for each card
+    results = []
+    for card in cards:
+        cashback, r = card_benefit(card["Spend"], card["Return %"], card["Fees"])
+        results.append({
+            "Card": card["Name"],
+            "Spend (€)": card["Spend"],
+            "Return %": card["Return %"],
+            "Fees (€)": card["Fees"],
+            "Cashback (€)": f"{cashback:.2f}",
+            "Effective Return %": f"{r:.2f}"
+        })
+
+    # Display as DataFrame
+    df = pd.DataFrame(results)
+    st.dataframe(df, use_container_width=True)
+
+    # Highlight best card
+    best_card = df.loc[df["Effective Return %"].astype(float).idxmax()]
+    st.success(f"**Best Card: {best_card['Card']}** with **{best_card['Effective Return %']}%** effective return")
