@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "demucs>=4.0.1",
     "dowhy>=0.12",
     "matplotlib>=3.10.8",
     "numpy>=2.4.3",
@@ -15,6 +16,7 @@ dependencies = [
     "seaborn>=0.13.2",
     "statsmodels>=0.14.6",
     "streamlit>=1.55.0",
+    "whisper>=1.1.10",
     "yfinance>=1.2.0",
 ]
 
