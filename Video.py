@@ -6,8 +6,10 @@ import soundfile as sf
 import streamlit as st
 
 # from demucs import translate
+# from demucs.pretrained import get_model
+# from demucs.separate import separate
+from demucs.api import Separator
 from demucs.pretrained import get_model
-from demucs.separate import separate
 
 # Whisper (optional)
 try:
@@ -62,85 +64,134 @@ def denoise_with_rnnoise(audio_in: str, audio_out: str) -> None:
 def denoise_with_demucs(audio_in: str, audio_out: str) -> None:
     """
     Denoise audio using demucs (AI source separation).
-    We separate into stems and recombine them to get a cleaned version.
+    We separate into stems (vocals, other, drums, bass) and recombine them
+    to get a cleaned version of the original audio.
     """
     import scipy.signal as sig
+    import torch
 
-    # Ensure 44.1kHz for demucs
+    # Load audio (demucs expects float32, channels first, 44.1kHz)
     data, rate = sf.read(audio_in)
+    if data.ndim == 1:
+        data = data.reshape(1, -1)
+    else:
+        data = data.T  # demucs expects (channels, time)
+
     if rate != 44100:
-        num_samples = int(len(data) * 44100 / rate)
-        data = sig.resample(data, num_samples).astype(np.float32)
+        num_samples = int(len(data[0]) * 44100 / rate)
+        data = sig.resample(data[0], num_samples)
+        data = data.reshape(1, -1)
         rate = 44100
 
-    tmp_44 = audio_in + "_44.wav"
-    sf.write(tmp_44, data, rate)
+    data = data.astype(np.float32)
+    wav = torch.from_numpy(data)
 
-    # Load model
-    model = get_model("htdemucs")
+    # Initialize Separator with htdemucs model
+    separator = Separator("htdemucs", device="cpu", progress=True)
 
-    # Create temp output dir
-    sep_dir = tempfile.mkdtemp()
+    # Separate
+    _, stems = separator.separate(wav)
 
-    # Separate: uses the high-level separate function
-    separate(
-        model=model,
-        track=tmp_44,
-        output_dir=sep_dir,
-        verbose=False,
-    )
+    # Recombine all stems
+    total = sum(stems[stem] for stem in stems.keys())
 
-    # Find track folder
-    track_dir = None
-    for name in os.listdir(sep_dir):
-        path = os.path.join(sep_dir, name)
-        if os.path.isdir(path):
-            track_dir = path
-            break
-    if track_dir is None:
-        raise RuntimeError("demucs did not create a track folder.")
+    total = np.clip(total.numpy(), -1.0, 1.0)
 
-    # Sum all stems (vocal, other, drums, bass)
-    total = None
-    for stem in ["vocal", "other", "drums", "bass"]:
-        stem_path = os.path.join(track_dir, stem + ".wav")
-        if not os.path.exists(stem_path):
-            continue
-        stem_data, stem_rate = sf.read(stem_path)
-        if total is None:
-            total = stem_data
-        else:
-            if len(stem_data) != len(total):
-                if len(stem_data) > len(total):
-                    stem_data = stem_data[:len(total)]
-                else:
-                    stem_data = np.pad(stem_data, (0, len(total) - len(stem_data)))
-            total = total + stem_data
+    if total.ndim == 1:
+        total = total.reshape(-1)
+    else:
+        total = total.mean(axis=0)  # mono
 
-    if total is None:
-        raise RuntimeError("demucs produced no stems.")
-
-    total = np.clip(total, -1.0, 1.0)
-
-    # Resample to 16kHz mono for ffmpeg
-    if total.ndim > 1:
-        total = total.mean(axis=1)
+    # Resample to 16kHz for ffmpeg
     if rate != 16000:
         num_samples = int(len(total) * 16000 / rate)
         total = sig.resample(total, num_samples).astype(np.float32)
         rate = 16000
 
     save_audio(audio_out, total, rate)
-
-    # Cleanup
-    for root, dirs, files in os.walk(sep_dir):
-        for f in files:
-            os.remove(os.path.join(root, f))
-        for d in dirs:
-            os.rmdir(os.path.join(root, d))
-    os.rmdir(sep_dir)
-    if os.path.exists(tmp_44):
-        os.remove(tmp_44)
+    
+# def denoise_with_demucs(audio_in: str, audio_out: str) -> None:
+#     """
+#     Denoise audio using demucs (AI source separation).
+#     We separate into stems and recombine them to get a cleaned version.
+#     """
+#     import scipy.signal as sig
+# 
+#     # Ensure 44.1kHz for demucs
+#     data, rate = sf.read(audio_in)
+#     if rate != 44100:
+#         num_samples = int(len(data) * 44100 / rate)
+#         data = sig.resample(data, num_samples).astype(np.float32)
+#         rate = 44100
+# 
+#     tmp_44 = audio_in + "_44.wav"
+#     sf.write(tmp_44, data, rate)
+# 
+#     # Load model
+#     model = get_model("htdemucs")
+# 
+#     # Create temp output dir
+#     sep_dir = tempfile.mkdtemp()
+# 
+#     # Separate: uses the high-level separate function
+#     separate(
+#         model=model,
+#         track=tmp_44,
+#         output_dir=sep_dir,
+#         verbose=False,
+#     )
+# 
+#     # Find track folder
+#     track_dir = None
+#     for name in os.listdir(sep_dir):
+#         path = os.path.join(sep_dir, name)
+#         if os.path.isdir(path):
+#             track_dir = path
+#             break
+#     if track_dir is None:
+#         raise RuntimeError("demucs did not create a track folder.")
+# 
+#     # Sum all stems (vocal, other, drums, bass)
+#     total = None
+#     for stem in ["vocal", "other", "drums", "bass"]:
+#         stem_path = os.path.join(track_dir, stem + ".wav")
+#         if not os.path.exists(stem_path):
+#             continue
+#         stem_data, stem_rate = sf.read(stem_path)
+#         if total is None:
+#             total = stem_data
+#         else:
+#             if len(stem_data) != len(total):
+#                 if len(stem_data) > len(total):
+#                     stem_data = stem_data[:len(total)]
+#                 else:
+#                     stem_data = np.pad(stem_data, (0, len(total) - len(stem_data)))
+#             total = total + stem_data
+# 
+#     if total is None:
+#         raise RuntimeError("demucs produced no stems.")
+# 
+#     total = np.clip(total, -1.0, 1.0)
+# 
+#     # Resample to 16kHz mono for ffmpeg
+#     if total.ndim > 1:
+#         total = total.mean(axis=1)
+#     if rate != 16000:
+#         num_samples = int(len(total) * 16000 / rate)
+#         total = sig.resample(total, num_samples).astype(np.float32)
+#         rate = 16000
+# 
+#     save_audio(audio_out, total, rate)
+# 
+#     # Cleanup
+#     for root, dirs, files in os.walk(sep_dir):
+#         for f in files:
+#             os.remove(os.path.join(root, f))
+#         for d in dirs:
+#             os.rmdir(os.path.join(root, d))
+#     os.rmdir(sep_dir)
+#     if os.path.exists(tmp_44):
+#         os.remove(tmp_44)
         
 # def denoise_with_demucs(audio_in: str, audio_out: str) -> None:
 #     """
