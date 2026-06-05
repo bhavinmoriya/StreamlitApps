@@ -336,10 +336,10 @@ if df is not None:
     st.divider()
     st.subheader("📚 Learn More")
     st.markdown("""
-    - [DoWhy Documentation](https://microsoft.github.io/dowhy/)
-    - [Causal Inference: The Mixtape](https://www.scunning.com/causal-inference-the-mixtape.html) (Free book by Scott Cunningham)
+    - [DoWhy Documentation](https://www.pywhy.org/dowhy/v0.14/)
+    - [Causal Inference: The Mixtape](https://mixtape.scunning.com/) (Free book by Scott Cunningham)
     - [StatsModels Documentation](https://www.statsmodels.org/stable/index.html)
-    - [Correlation vs. Causation: A Guide](https://towardsdatascience.com/correlation-vs-causation-1a0571f79e5e)
+    - [Correlation vs. Causation: A Guide](https://amplitude.com/blog/causation-correlation)
     """)
 
 else:
