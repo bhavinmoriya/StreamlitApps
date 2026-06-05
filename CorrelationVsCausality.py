@@ -339,7 +339,7 @@ if df is not None:
     - [DoWhy Documentation](https://www.pywhy.org/dowhy/v0.14/)
     - [Causal Inference: The Mixtape](https://mixtape.scunning.com/) (Free book by Scott Cunningham)
     - [StatsModels Documentation](https://www.statsmodels.org/stable/index.html)
-    - [Correlation vs. Causation: A Guide](https://amplitude.com/blog/causation-correlation)
+    - [Correlation vs. Causation: A Guide](https://github.com/bhavinmoriya/StreamlitApps/blob/main/CorrelationVsCausality.md)
     """)
 
 else:
