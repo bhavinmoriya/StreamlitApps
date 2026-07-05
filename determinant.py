@@ -20,10 +20,9 @@ def generate_animation_frames(matrix):
     frames = []
     n = matrix.shape[0]
     for col in range(n):
-        # Create a copy of the matrix for this frame
         frame_matrix = matrix.copy()
         # Highlight the current column
-        frame_matrix[:, col] = 10  # Arbitrary high value for visualization
+        frame_matrix[:, col] = 150  # Arbitrary high value for visualization
         frames.append(frame_matrix)
     return frames
 
@@ -34,15 +33,15 @@ def create_matrix_fig(matrix, title):
         colorscale='Viridis',
         text=np.round(matrix, 2),
         texttemplate='%{text}',
-        textfont={"size": 20},
+        textfont={"size": 16},
         colorbar=dict(title="Value")
     ))
     fig.update_layout(
         title=title,
         xaxis=dict(tickmode='linear', tick0=0.5, dtick=1, showticklabels=False),
         yaxis=dict(tickmode='linear', tick0=0.5, dtick=1, showticklabels=False),
-        height=400,
-        width=400
+        height=500,
+        width=500
     )
     return fig
 
@@ -96,25 +95,27 @@ def create_animation(matrix):
 
 # Streamlit app
 st.title("Interactive Determinant Calculator with Animation")
-st.write("Adjust the sliders to change the matrix values.")
+st.write("Select the matrix size and adjust the sliders to change the values.")
+
+# Matrix size selection
+matrix_size = st.selectbox("Matrix Size", [2, 3, 4], index=1)
 
 # Initialize matrix
-n = 3
-matrix = np.zeros((n, n))
+matrix = np.zeros((matrix_size, matrix_size))
 
 # Create sliders for matrix input
-for i in range(n):
-    cols = st.columns(n)
-    for j in range(n):
+for i in range(matrix_size):
+    cols = st.columns(matrix_size)
+    for j in range(matrix_size):
         matrix[i, j] = cols[j].slider(
             f"Matrix[{i}][{j}]",
-            -10.0, 10.0, 0.0, 0.1,
+            -100.0, 100.0, 0.0, 1.0,
             key=f"matrix_{i}_{j}"
         )
 
 # Display the matrix
 st.subheader("Matrix")
-st.write(matrix)
+st.write(np.round(matrix, 2))
 
 # Calculate and display determinant
 det = determinant(matrix)
