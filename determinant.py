@@ -1,7 +1,6 @@
 import streamlit as st
 import numpy as np
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 
 # Function to calculate determinant with cofactor expansion
 def determinant(matrix):
@@ -52,15 +51,18 @@ def create_animation(matrix):
     frames = generate_animation_frames(matrix)
     fig = create_matrix_fig(matrix, "Original Matrix")
 
-    # Add frames to the figure
-    fig.frames = []
+    # Create a list of frames for the animation
+    animation_frames = []
     for i, frame_matrix in enumerate(frames):
-        fig.frames.append(
+        animation_frames.append(
             go.Frame(
                 data=[go.Heatmap(z=frame_matrix)],
                 name=f"Step {i+1}"
             )
         )
+
+    # Add frames to the figure
+    fig.frames = animation_frames
 
     # Add buttons to control animation
     fig.update_layout(
