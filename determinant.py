@@ -2,7 +2,6 @@ import streamlit as st
 import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import time
 
 # Function to calculate determinant with cofactor expansion
 def determinant(matrix):
@@ -56,7 +55,7 @@ def create_animation(matrix):
     # Add frames to the figure
     fig.frames = []
     for i, frame_matrix in enumerate(frames):
-        fig.add_frame(
+        fig.frames.append(
             go.Frame(
                 data=[go.Heatmap(z=frame_matrix)],
                 name=f"Step {i+1}"
@@ -67,15 +66,19 @@ def create_animation(matrix):
     fig.update_layout(
         updatemenus=[{
             "buttons": [
-                {"args": [None, {"frame": {"duration": 500, "redraw": True},
-                                 "fromcurrent": True, "transition": {"duration": 0}}],
-                  "label": "Play",
-                  "method": "animate"},
-                {"args": [[None], {"frame": {"duration": 0, "redraw": True},
-                                   "mode": "immediate",
-                                   "transition": {"duration": 0}}],
-                  "label": "Pause",
-                  "method": "animate"}
+                {
+                    "args": [None, {"frame": {"duration": 500, "redraw": True},
+                                   "fromcurrent": True, "transition": {"duration": 0}}],
+                    "label": "Play",
+                    "method": "animate"
+                },
+                {
+                    "args": [[None], {"frame": {"duration": 0, "redraw": True},
+                                       "mode": "immediate",
+                                       "transition": {"duration": 0}}],
+                    "label": "Pause",
+                    "method": "animate"
+                }
             ],
             "direction": "left",
             "pad": {"r": 10, "t": 87},
