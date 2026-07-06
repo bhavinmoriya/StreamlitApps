@@ -33,62 +33,25 @@ for eq in equations:
 if st.button("Solve"):
     st.subheader("Step-by-Step Solution:")
 
-    # Method 1: Substitution (for 2 equations)
-    if num_eq == 2 and num_vars == 2:
-        st.write("### Method: Substitution")
-        x, y = symbols('x1 x2')
-        eq1, eq2 = equations
+    # Extract coefficients and constants
+    A = []
+    B = []
+    for eq in equations:
+        coeffs = [eq.lhs.coeff(var) for var in symbol_list]
+        A.append(coeffs)
+        B.append(eq.rhs)
 
-        # Solve eq1 for x1
-        st.write(f"1. Solve the first equation for {sp.pretty(x)}:")
-        try:
-            sol_x1 = sp.solve(eq1, x)[0]
-            st.latex(f"{sp.pretty(x)} = {sp.pretty(sol_x1)}")
+    A_mat = Matrix(A)
+    B_mat = Matrix([B])  # Ensure B is a column vector
 
-            # Substitute into eq2
-            st.write(f"2. Substitute {sp.pretty(x)} into the second equation:")
-            eq2_sub = eq2.subs(x, sol_x1)
-            st.latex(f"{sp.pretty(eq2_sub)}")
+    # Transpose B_mat to make it a column vector
+    B_mat = B_mat.T
 
-            # Solve for x2
-            st.write(f"3. Solve for {sp.pretty(y)}:")
-            try:
-                sol_y = sp.solve(eq2_sub, y)[0]
-                st.latex(f"{sp.pretty(y)} = {sp.pretty(sol_y)}")
-
-                # Substitute back to find x1
-                st.write(f"4. Substitute {sp.pretty(y)} back into the expression for {sp.pretty(x)}:")
-                sol_x = sol_x1.subs(y, sol_y)
-                st.latex(f"{sp.pretty(x)} = {sp.pretty(sol_x)}")
-
-                # Final solution
-                st.write("### Final Solution:")
-                st.latex(f"{sp.pretty(x)} = {sp.pretty(sol_x)}")
-                st.latex(f"{sp.pretty(y)} = {sp.pretty(sol_y)}")
-            except IndexError:
-                # Infinitely many solutions
-                st.write("The system has infinitely many solutions.")
-                st.write("### General Solution:")
-                st.latex(f"{sp.pretty(x)} = {sp.pretty(sol_x1)}")
-                st.write("Choose a value for y to find a particular solution:")
-                y_val = st.number_input("Enter a value for y:", value=0.0, step=0.1)
-                sol_x_particular = sol_x1.subs(y, y_val)
-                st.latex(f"{sp.pretty(x)} = {sp.pretty(sol_x_particular)}")
-        except IndexError:
-            st.write("The system has no unique solution (either no solution or infinitely many).")
-
-    # Method 2: Matrix Method (for any size)
+    # Check if the system is solvable
+    if A_mat.shape[0] != B_mat.shape[0]:
+        st.error("Error: The number of equations and constants must match.")
     else:
         st.write("### Method: Matrix (Gaussian Elimination)")
-        A = []
-        B = []
-        for eq in equations:
-            coeffs = [eq.lhs.coeff(var) for var in symbol_list]
-            A.append(coeffs)
-            B.append(eq.rhs)
-
-        A_mat = Matrix(A)
-        B_mat = Matrix(B)
         st.write("1. Augmented Matrix:")
         augmented = A_mat.col_join(B_mat)
         st.latex(f"\\left[\\begin{{matrix}}{augmented.to_string()}\\end{{matrix}}\\right]")
