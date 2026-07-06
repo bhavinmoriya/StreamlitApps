@@ -39,61 +39,67 @@ if st.button("Solve using Gaussian Elimination"):
 
     # Create augmented matrix
     A_mat = Matrix(A)
-    B_mat = Matrix([B]).T  # Column vector
-    augmented = A_mat.col_join(B_mat)
-    st.write("1. Augmented Matrix:")
-    st.latex(f"\\left[\\begin{{matrix}}{augmented.to_string()}\\end{{matrix}}\\right]")
+    B_mat = Matrix(B)  # Create a row vector
+    B_mat = B_mat.reshape(num_eq, 1)  # Reshape to a column vector
 
-    # Perform Gaussian elimination to RREF
-    rref, pivot_cols = augmented.rref()
-
-    st.write("2. Reduced Row-Echelon Form (RREF):")
-    st.latex(f"\\left[\\begin{{matrix}}{rref.to_string()}\\end{{matrix}}\\right]")
-
-    # Analyze the RREF
-    st.subheader("Analysis of RREF:")
-
-    # Check for no solution
-    no_solution = False
-    for row in rref:
-        if all(x == 0 for x in row[:-1]) and row[-1] != 0:
-            no_solution = True
-            break
-
-    if no_solution:
-        st.write("The system has **no solution** (inconsistent system).")
-        st.write("Reason: There is a row of the form [0 0 ... 0 | b] where b ≠ 0.")
-
+    # Check if the shapes are compatible
+    if A_mat.shape[0] != B_mat.shape[0]:
+        st.error("Error: The number of equations and constants must match.")
     else:
-        # Check for infinitely many solutions
-        free_vars = [var for i, var in enumerate(symbol_list) if i not in pivot_cols]
-        if free_vars:
-            st.write("The system has **infinitely many solutions**.")
-            st.write("Reason: There is at least one free variable (no pivot in its column).")
-            st.write(f"Free variable(s): {', '.join([f'{var}' for var in free_vars])}")
+        augmented = A_mat.col_join(B_mat)
+        st.write("1. Augmented Matrix:")
+        st.latex(f"\\left[\\begin{{matrix}}{augmented.to_string()}\\end{{matrix}}\\right]")
 
-            # General solution
-            st.write("### General Solution:")
-            solution = linsolve((A_mat, B_mat), symbol_list)
-            if solution:
-                general_solution = solution.args[0]
-                st.latex(f"{sp.pretty(general_solution)}")
+        # Perform Gaussian elimination to RREF
+        rref, pivot_cols = augmented.rref()
 
-                # Allow user to input values for free variables
-                st.write("Choose values for the free variables to find a particular solution:")
-                particular_solution = general_solution.copy()
-                for var in free_vars:
-                    val = st.number_input(f"Enter a value for {sp.pretty(var)}:", value=0.0, step=0.1, key=f"free_var_{var}")
-                    particular_solution = particular_solution.subs(var, val)
-                st.write("### Particular Solution:")
-                st.latex(f"{sp.pretty(particular_solution)}")
+        st.write("2. Reduced Row-Echelon Form (RREF):")
+        st.latex(f"\\left[\\begin{{matrix}}{rref.to_string()}\\end{{matrix}}\\right]")
+
+        # Analyze the RREF
+        st.subheader("Analysis of RREF:")
+
+        # Check for no solution
+        no_solution = False
+        for row in rref:
+            if all(x == 0 for x in row[:-1]) and row[-1] != 0:
+                no_solution = True
+                break
+
+        if no_solution:
+            st.write("The system has **no solution** (inconsistent system).")
+            st.write("Reason: There is a row of the form [0 0 ... 0 | b] where b ≠ 0.")
+
         else:
-            st.write("The system has a **unique solution**.")
-            st.write("Reason: Every variable has a leading 1 (pivot) in its column.")
+            # Check for infinitely many solutions
+            free_vars = [var for i, var in enumerate(symbol_list) if i not in pivot_cols]
+            if free_vars:
+                st.write("The system has **infinitely many solutions**.")
+                st.write("Reason: There is at least one free variable (no pivot in its column).")
+                st.write(f"Free variable(s): {', '.join([f'{var}' for var in free_vars])}")
 
-            # Unique solution
-            st.write("### Solution:")
-            solution = linsolve((A_mat, B_mat), symbol_list)
-            if solution:
-                for sol in solution:
-                    st.latex(f"{sp.pretty(sol)}")
+                # General solution
+                st.write("### General Solution:")
+                solution = linsolve((A_mat, B_mat), symbol_list)
+                if solution:
+                    general_solution = solution.args[0]
+                    st.latex(f"{sp.pretty(general_solution)}")
+
+                    # Allow user to input values for free variables
+                    st.write("Choose values for the free variables to find a particular solution:")
+                    particular_solution = general_solution.copy()
+                    for var in free_vars:
+                        val = st.number_input(f"Enter a value for {sp.pretty(var)}:", value=0.0, step=0.1, key=f"free_var_{var}")
+                        particular_solution = particular_solution.subs(var, val)
+                    st.write("### Particular Solution:")
+                    st.latex(f"{sp.pretty(particular_solution)}")
+            else:
+                st.write("The system has a **unique solution**.")
+                st.write("Reason: Every variable has a leading 1 (pivot) in its column.")
+
+                # Unique solution
+                st.write("### Solution:")
+                solution = linsolve((A_mat, B_mat), symbol_list)
+                if solution:
+                    for sol in solution:
+                        st.latex(f"{sp.pretty(sol)}")
