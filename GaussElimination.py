@@ -110,3 +110,16 @@ if st.button("Solve using Gaussian Elimination"):
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
             st.write("Please check your input and try again.")
+
+linkedin_url = "https://www.linkedin.com/in/bhavin-moriya-ph-d-b0b88b2/"
+# Option 1: Simple Markdown
+st.markdown(f"[My LinkedIn]({linkedin_url})")
+
+# Option 2: HTML with custom text
+st.markdown(
+    f'<a href="{linkedin_url}" target="_blank">🔗 Visit my LinkedIn</a>',
+    unsafe_allow_html=True
+)
+
+# Option 3: Button
+st.link_button("Connect on LinkedIn", linkedin_url)
