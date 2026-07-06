@@ -26,7 +26,7 @@ for i in range(num_eq):
     constant = cols[num_vars].number_input(f"Constant term", value=1.0, step=0.1, key=f"eq{i}_const")
     equations.append(Eq(sum(coeffs[k] * symbol_list[k] for k in range(num_vars)), constant))
     A.append(coeffs)
-    B.append(constant)
+    B.append([constant])  # Store as a list of lists for column vector
 
 # Display the system of equations
 st.subheader("System of Equations:")
@@ -37,15 +37,17 @@ for eq in equations:
 if st.button("Solve using Gaussian Elimination"):
     st.subheader("Step-by-Step Row Reduction to RREF:")
 
-    # Create augmented matrix
+    # Create coefficient matrix A_mat
     A_mat = Matrix(A)
-    B_mat = Matrix(B)  # Create a row vector
-    B_mat = B_mat.reshape(num_eq, 1)  # Reshape to a column vector
+
+    # Create constant matrix B_mat as a column vector
+    B_mat = Matrix(B)
 
     # Check if the shapes are compatible
     if A_mat.shape[0] != B_mat.shape[0]:
         st.error("Error: The number of equations and constants must match.")
     else:
+        # Form the augmented matrix [A|B]
         augmented = A_mat.col_join(B_mat)
         st.write("1. Augmented Matrix:")
         st.latex(f"\\left[\\begin{{matrix}}{augmented.to_string()}\\end{{matrix}}\\right]")
