@@ -41,28 +41,41 @@ if st.button("Solve"):
 
         # Solve eq1 for x1
         st.write(f"1. Solve the first equation for {sp.pretty(x)}:")
-        sol_x1 = sp.solve(eq1, x)[0]
-        st.latex(f"{sp.pretty(x)} = {sp.pretty(sol_x1)}")
+        try:
+            sol_x1 = sp.solve(eq1, x)[0]
+            st.latex(f"{sp.pretty(x)} = {sp.pretty(sol_x1)}")
 
-        # Substitute into eq2
-        st.write(f"2. Substitute {sp.pretty(x)} into the second equation:")
-        eq2_sub = eq2.subs(x, sol_x1)
-        st.latex(f"{sp.pretty(eq2_sub)}")
+            # Substitute into eq2
+            st.write(f"2. Substitute {sp.pretty(x)} into the second equation:")
+            eq2_sub = eq2.subs(x, sol_x1)
+            st.latex(f"{sp.pretty(eq2_sub)}")
 
-        # Solve for x2
-        st.write(f"3. Solve for {sp.pretty(y)}:")
-        sol_y = sp.solve(eq2_sub, y)[0]
-        st.latex(f"{sp.pretty(y)} = {sp.pretty(sol_y)}")
+            # Solve for x2
+            st.write(f"3. Solve for {sp.pretty(y)}:")
+            try:
+                sol_y = sp.solve(eq2_sub, y)[0]
+                st.latex(f"{sp.pretty(y)} = {sp.pretty(sol_y)}")
 
-        # Substitute back to find x1
-        st.write(f"4. Substitute {sp.pretty(y)} back into the expression for {sp.pretty(x)}:")
-        sol_x = sol_x1.subs(y, sol_y)
-        st.latex(f"{sp.pretty(x)} = {sp.pretty(sol_x)}")
+                # Substitute back to find x1
+                st.write(f"4. Substitute {sp.pretty(y)} back into the expression for {sp.pretty(x)}:")
+                sol_x = sol_x1.subs(y, sol_y)
+                st.latex(f"{sp.pretty(x)} = {sp.pretty(sol_x)}")
 
-        # Final solution
-        st.write("### Final Solution:")
-        st.latex(f"{sp.pretty(x)} = {sp.pretty(sol_x)}")
-        st.latex(f"{sp.pretty(y)} = {sp.pretty(sol_y)}")
+                # Final solution
+                st.write("### Final Solution:")
+                st.latex(f"{sp.pretty(x)} = {sp.pretty(sol_x)}")
+                st.latex(f"{sp.pretty(y)} = {sp.pretty(sol_y)}")
+            except IndexError:
+                # Infinitely many solutions
+                st.write("The system has infinitely many solutions.")
+                st.write("### General Solution:")
+                st.latex(f"{sp.pretty(x)} = {sp.pretty(sol_x1)}")
+                st.write("Choose a value for y to find a particular solution:")
+                y_val = st.number_input("Enter a value for y:", value=0.0, step=0.1)
+                sol_x_particular = sol_x1.subs(y, y_val)
+                st.latex(f"{sp.pretty(x)} = {sp.pretty(sol_x_particular)}")
+        except IndexError:
+            st.write("The system has no unique solution (either no solution or infinitely many).")
 
     # Method 2: Matrix Method (for any size)
     else:
@@ -87,18 +100,40 @@ if st.button("Solve"):
 
         # Extract solution
         solution = linsolve((A_mat, B_mat), symbol_list)
-        st.write("### Final Solution:")
-        if solution:
-            for sol in solution:
-                st.latex(f"{sp.pretty(sol)}")
-        else:
+        st.write("### Solution:")
+        if not solution:
             st.write("No solution exists (inconsistent system).")
+        else:
+            # Check if the solution is parametric (infinitely many solutions)
+            if len(solution) == 1 and any(sol.has(sp.Symbol) for sol in solution.args[0]):
+                st.write("The system has infinitely many solutions.")
+                st.write("### General Solution:")
+                general_solution = solution.args[0]
+                st.latex(f"{sp.pretty(general_solution)}")
+
+                # Allow user to input values for free variables
+                free_vars = [var for var in symbol_list if var in general_solution.free_symbols]
+                if free_vars:
+                    st.write("Choose values for the free variables to find a particular solution:")
+                    particular_solution = general_solution.copy()
+                    for var in free_vars:
+                        val = st.number_input(f"Enter a value for {sp.pretty(var)}:", value=0.0, step=0.1, key=f"free_var_{var}")
+                        particular_solution = particular_solution.subs(var, val)
+                    st.write("### Particular Solution:")
+                    st.latex(f"{sp.pretty(particular_solution)}")
+            else:
+                for sol in solution:
+                    st.latex(f"{sp.pretty(sol)}")
 
     # General solution using SymPy's solve
     st.write("### Verification using SymPy's `solve`:")
     solution = solve(equations, symbol_list)
     if solution:
-        for var, val in solution.items():
-            st.latex(f"{sp.pretty(var)} = {sp.pretty(val)}")
+        if isinstance(solution, dict):
+            for var, val in solution.items():
+                st.latex(f"{sp.pretty(var)} = {sp.pretty(val)}")
+        else:
+            st.write("General solution:")
+            st.latex(f"{sp.pretty(solution)}")
     else:
         st.write("No solution exists.")
