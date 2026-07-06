@@ -114,10 +114,23 @@ if st.button("Solve using Gaussian Elimination"):
 linkedin_url = "https://www.linkedin.com/in/bhavin-moriya-ph-d-b0b88b2/"
 github_url = "https://github.com/bhavinmoriya"
 
-# Option 1: Simple Markdown
-st.markdown(f"[Follow me on LinkedIn]({linkedin_url})")
+st.markdown("## Connect with me")
 
-st.markdown(f"[Follow me on GitHub]({github_url})")
+col1, col2 = st.columns(2)
+
+with col1:
+    st.link_button("🔗 Follow on LinkedIn", linkedin_url)
+
+with col2:
+    st.link_button("💻 Follow on GitHub", github_url)
+    
+# linkedin_url = "https://www.linkedin.com/in/bhavin-moriya-ph-d-b0b88b2/"
+# github_url = "https://github.com/bhavinmoriya"
+# 
+# # Option 1: Simple Markdown
+# st.markdown(f"[Follow me on LinkedIn]({linkedin_url})")
+# 
+# st.markdown(f"[Follow me on GitHub]({github_url})")
 
 # # Option 2: HTML with custom text
 # st.markdown(
