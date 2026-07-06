@@ -26,7 +26,7 @@ for i in range(num_eq):
     constant = cols[num_vars].number_input(f"Constant term", value=1.0, step=0.1, key=f"eq{i}_const")
     equations.append(Eq(sum(coeffs[k] * symbol_list[k] for k in range(num_vars)), constant))
     A.append(coeffs)
-    B.append([constant])  # Store as a list of lists for column vector
+    B.append(constant)
 
 # Display the system of equations
 st.subheader("System of Equations:")
@@ -41,7 +41,7 @@ if st.button("Solve using Gaussian Elimination"):
     A_mat = Matrix(A)
 
     # Create constant matrix B_mat as a column vector
-    B_mat = Matrix(B)
+    B_mat = Matrix([B]).T  # Transpose to make it a column vector
 
     # Check if the shapes are compatible
     if A_mat.shape[0] != B_mat.shape[0]:
