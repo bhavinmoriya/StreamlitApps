@@ -112,14 +112,18 @@ if st.button("Solve using Gaussian Elimination"):
             st.write("Please check your input and try again.")
 
 linkedin_url = "https://www.linkedin.com/in/bhavin-moriya-ph-d-b0b88b2/"
+github_url = "https://github.com/bhavinmoriya"
+
 # Option 1: Simple Markdown
-st.markdown(f"[My LinkedIn]({linkedin_url})")
+st.markdown(f"[Follow me on LinkedIn]({linkedin_url})")
 
-# Option 2: HTML with custom text
-st.markdown(
-    f'<a href="{linkedin_url}" target="_blank">🔗 Visit my LinkedIn</a>',
-    unsafe_allow_html=True
-)
+st.markdown(f"[Follow me on GitHub]({github_url})")
 
-# Option 3: Button
-st.link_button("Connect on LinkedIn", linkedin_url)
+# # Option 2: HTML with custom text
+# st.markdown(
+#     f'<a href="{linkedin_url}" target="_blank">🔗 Follow me on LinkedIn</a>',
+#     unsafe_allow_html=True
+# )
+# 
+# # Option 3: Button
+# st.link_button("Connect on LinkedIn", linkedin_url)
