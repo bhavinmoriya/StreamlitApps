@@ -84,3 +84,16 @@ with tab2:
             best_idx = df["Effective Return %"].astype(float).idxmax()
             best_card = df.loc[best_idx]
             st.success(f"**🏆 Best Card: {best_card['Card']}** with **{best_card['Effective Return %']}%** effective return")
+
+linkedin_url = "https://www.linkedin.com/in/bhavin-moriya-ph-d-b0b88b2/"
+github_url = "https://github.com/bhavinmoriya"
+
+st.markdown("## Connect with me")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.link_button("🔗 Follow on LinkedIn", linkedin_url)
+
+with col2:
+    st.link_button("💻 Follow on GitHub", github_url)
