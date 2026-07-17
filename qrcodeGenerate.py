@@ -43,17 +43,18 @@ if st.button("Generate QR Code"):
             qr.add_data(link)
             qr.make(fit=True)
 
-            # Create image
+            # Create PIL image
             img = qr.make_image(fill_color=fill_color, back_color=back_color)
 
-            # Display the QR code
-            st.image(img, caption="Generated QR Code", use_column_width=True)
-
-            # Download button
+            # Convert PIL image to bytes
             buf = io.BytesIO()
             img.save(buf, format="PNG")
             byte_im = buf.getvalue()
 
+            # Display the QR code
+            st.image(byte_im, caption="Generated QR Code", use_column_width=True)
+
+            # Download button
             st.download_button(
                 label="Download QR Code",
                 data=byte_im,
