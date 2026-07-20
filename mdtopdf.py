@@ -1,15 +1,10 @@
 import streamlit as st
-import markdown2
-from weasyprint import HTML
-import os
-from tempfile import NamedTemporaryFile
+from markdown_pdf import convert
 
-# Set page title and description
 st.set_page_config(page_title="Markdown to PDF Converter", page_icon="📄")
 st.title("Markdown to PDF Converter")
 st.write("Upload a Markdown file, and download it as a PDF.")
 
-# File uploader
 uploaded_file = st.file_uploader("Choose a Markdown file", type=["md", "markdown"])
 
 if uploaded_file is not None:
@@ -17,30 +12,16 @@ if uploaded_file is not None:
         # Read the uploaded file
         markdown_content = uploaded_file.read().decode("utf-8")
 
-        # Convert Markdown to HTML
-        html_content = markdown2.markdown(markdown_content)
-
-        # Create a temporary HTML file
-        with NamedTemporaryFile(delete=False, suffix=".html", mode="w+", encoding="utf-8") as temp_html:
-            temp_html.write(html_content)
-            temp_html_path = temp_html.name
-
-        # Convert HTML to PDF using weasyprint
-        pdf_path = "output.pdf"
-        HTML(string=html_content).write_pdf(pdf_path)
+        # Convert Markdown to PDF
+        pdf_bytes = convert(markdown_content)
 
         # Provide download link for the PDF
-        with open(pdf_path, "rb") as f:
-            st.download_button(
-                label="Download PDF",
-                data=f,
-                file_name="converted.pdf",
-                mime="application/pdf",
-            )
-
-        # Clean up the temporary files
-        os.unlink(temp_html_path)
-        os.unlink(pdf_path)
+        st.download_button(
+            label="Download PDF",
+            data=pdf_bytes,
+            file_name="converted.pdf",
+            mime="application/pdf",
+        )
 
     except Exception as e:
         st.error(f"An error occurred: {e}")

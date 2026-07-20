@@ -7,6 +7,7 @@ requires-python = ">=3.12"
 dependencies = [
     "demucs>=4.0.1",
     "dowhy>=0.12",
+    "markdown-pdf>=1.13.2",
     "markdown2>=2.5.5",
     "matplotlib>=3.10.8",
     "numpy>=2.4.3",
