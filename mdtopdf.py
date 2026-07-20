@@ -1,7 +1,9 @@
 import streamlit as st
-from fpdf import FPDF
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 import markdown2
 from bs4 import BeautifulSoup
+import io
 
 st.set_page_config(page_title="Markdown to PDF Converter", page_icon="📄")
 st.title("Markdown to PDF Converter")
@@ -21,20 +23,21 @@ if uploaded_file is not None:
         soup = BeautifulSoup(html_content, "html.parser")
         text = soup.get_text()
 
-        # Create a PDF using fpdf2 with a Unicode font
-        pdf = FPDF()
-        pdf.add_page()
+        # Create a PDF using reportlab
+        buffer = io.BytesIO()
+        c = canvas.Canvas(buffer, pagesize=letter)
 
-        # Use DejaVu font (Unicode-compatible)
-        pdf.add_font("DejaVu", "", "DejaVuSansCondensed.ttf", uni=True)
-        pdf.set_font("DejaVu", size=12)
+        # Use Helvetica (built-in Unicode font in newer reportlab versions)
+        c.setFont("Helvetica", 12)
 
         # Split text into lines and write to PDF
+        y = 750  # Starting y position
         for line in text.split('\n'):
-            pdf.cell(0, 10, line, ln=True)
+            c.drawString(50, y, line)
+            y -= 15  # Move to the next line
 
-        # Save PDF to bytes
-        pdf_bytes = pdf.output(dest="S")
+        c.save()
+        pdf_bytes = buffer.getvalue()
 
         # Provide download link for the PDF
         st.download_button(
