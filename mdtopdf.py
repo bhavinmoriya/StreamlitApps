@@ -21,10 +21,13 @@ if uploaded_file is not None:
         soup = BeautifulSoup(html_content, "html.parser")
         text = soup.get_text()
 
-        # Create a PDF using fpdf2
+        # Create a PDF using fpdf2 with a Unicode font
         pdf = FPDF()
         pdf.add_page()
-        pdf.set_font("Arial", size=12)
+
+        # Use DejaVu font (Unicode-compatible)
+        pdf.add_font("DejaVu", "", "DejaVuSansCondensed.ttf", uni=True)
+        pdf.set_font("DejaVu", size=12)
 
         # Split text into lines and write to PDF
         for line in text.split('\n'):
