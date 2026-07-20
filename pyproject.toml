@@ -5,8 +5,10 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "beautifulsoup4>=4.14.3",
     "demucs>=4.0.1",
     "dowhy>=0.12",
+    "fpdf2>=2.8.7",
     "markdown-pdf>=1.13.2",
     "markdown2>=2.5.5",
     "matplotlib>=3.10.8",
