@@ -155,6 +155,11 @@ uploaded = st.file_uploader(
     type=["wav"],
 )
 
+# Add a clickable link
+st.markdown(
+    "Try decomposing sound to WAV: [Decompose Sound MP3 to WAV](https://mp3-to-wav-converter.streamlit.app/)"
+)
+
 audio_source = audio or uploaded
 
 
