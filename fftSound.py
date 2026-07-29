@@ -407,61 +407,111 @@ with st.expander("🧠 What's happening mathematically?"):
 
     st.markdown(
         r"""
-For a sampled voice signal
-
-\[
-x_0,x_1,\ldots,x_{N-1},
-\]
-
-the discrete Fourier transform is
-
-\[
-X_k =
-\sum_{n=0}^{N-1}
-x_n e^{-2\pi i kn/N}.
-\]
-
-Every \(X_k\) contains three pieces of information:
-
-\[
-X_k = |X_k|e^{i\phi_k}.
-\]
-
-So:
-
-- \(|X_k|\) = amplitude
-- \(\phi_k\) = phase
-- \(f_k=kf_s/N\) = frequency
-
-The original signal can be reconstructed using
-
-\[
-x_n =
-\frac1N
-\sum_{k=0}^{N-1}
-X_k e^{2\pi i kn/N}.
-\]
-
-The app deliberately throws away most of the \(X_k\)'s and
-keeps only the strongest components.
-
-Therefore you are hearing approximately
-
-\[
-\hat{x}(t)
-=
-\sum_{k\in S}
-A_k\cos(2\pi f_k t+\phi_k).
-\]
-
-The interesting experiment is to increase the number of
-components:
-
-\[
-5 \rightarrow 10 \rightarrow 20 \rightarrow 50
-\]
-
-and listen to how the speech becomes progressively more
-recognizable.
-"""
+        For a sampled voice signal:
+    
+        $$
+        x_0, x_1, \ldots, x_{N-1},
+        $$
+    
+        the **Discrete Fourier Transform (DFT)** is:
+    
+        $$
+        X_k = \sum_{n=0}^{N-1} x_n e^{-2\pi i kn/N}.
+        $$
+    
+        Every \(X_k\) contains three pieces of information:
+    
+        $$
+        X_k = |X_k|e^{i\phi_k}.
+        $$
+    
+        So:
+        - \(|X_k|\) = amplitude,
+        - \(\phi_k\) = phase,
+        - \(f_k = k f_s / N\) = frequency.
+    
+        ---
+        The original signal can be reconstructed using:
+    
+        $$
+        x_n = \frac{1}{N} \sum_{k=0}^{N-1} X_k e^{2\pi i kn/N}.
+        $$
+    
+        The app deliberately throws away most of the \(X_k\)'s and keeps only the strongest components.
+    
+        Therefore, you are hearing approximately:
+    
+        $$
+        \hat{x}(t) = \sum_{k \in S} A_k \cos(2\pi f_k t + \phi_k).
+        $$
+    
+        ---
+        **Experiment**: Increase the number of components:
+    
+        $$
+        5 \rightarrow 10 \rightarrow 20 \rightarrow 50
+        $$
+    
+        and listen to how the speech becomes progressively more recognizable.
+        """
     )
+#     st.markdown(
+#         r"""
+# For a sampled voice signal
+# 
+# \[
+# x_0,x_1,\ldots,x_{N-1},
+# \]
+# 
+# the discrete Fourier transform is
+# 
+# \[
+# X_k =
+# \sum_{n=0}^{N-1}
+# x_n e^{-2\pi i kn/N}.
+# \]
+# 
+# Every \(X_k\) contains three pieces of information:
+# 
+# \[
+# X_k = |X_k|e^{i\phi_k}.
+# \]
+# 
+# So:
+# 
+# - \(|X_k|\) = amplitude
+# - \(\phi_k\) = phase
+# - \(f_k=kf_s/N\) = frequency
+# 
+# The original signal can be reconstructed using
+# 
+# \[
+# x_n =
+# \frac1N
+# \sum_{k=0}^{N-1}
+# X_k e^{2\pi i kn/N}.
+# \]
+# 
+# The app deliberately throws away most of the \(X_k\)'s and
+# keeps only the strongest components.
+# 
+# Therefore you are hearing approximately
+# 
+# \[
+# \hat{x}(t)
+# =
+# \sum_{k\in S}
+# A_k\cos(2\pi f_k t+\phi_k).
+# \]
+# 
+# The interesting experiment is to increase the number of
+# components:
+# 
+# \[
+# 5 \rightarrow 10 \rightarrow 20 \rightarrow 50
+# \]
+# 
+# and listen to how the speech becomes progressively more
+# recognizable.
+# """
+#     )
