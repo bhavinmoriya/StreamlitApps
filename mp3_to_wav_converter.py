@@ -1,17 +1,23 @@
 import streamlit as st
-from pydub import AudioSegment
+import librosa
+import soundfile as sf
 import os
 import tempfile
+import numpy as np
 
 # App title
-st.title("🎵 MP3 to WAV Converter")
-st.write("Upload an MP3 file to convert it to WAV format.")
+st.title("🎵 MP3 to WAV Converter (Librosa)")
+st.write("Upload an MP3 file to convert it to WAV format using Librosa.")
+
+# Add a clickable link
+st.markdown(
+    "Try decomposing sound with FFT: [Decompose Sound with FFT](https://decompose-sound-fft.streamlit.app/)"
+)
 
 # File uploader
 uploaded_file = st.file_uploader("Choose an MP3 file", type=["mp3"])
 
 if uploaded_file is not None:
-    # Display uploaded file info
     st.success(f"File uploaded: {uploaded_file.name}")
 
     # Create a temporary directory to save files
@@ -21,11 +27,13 @@ if uploaded_file is not None:
         with open(mp3_path, "wb") as f:
             f.write(uploaded_file.getbuffer())
 
-        # Convert MP3 to WAV
         try:
-            audio = AudioSegment.from_mp3(mp3_path)
+            # Load MP3 file using librosa
+            y, sr = librosa.load(mp3_path, sr=None)
+
+            # Save as WAV using soundfile
             wav_path = os.path.join(temp_dir, "output.wav")
-            audio.export(wav_path, format="wav")
+            sf.write(wav_path, y, sr)
 
             # Provide download button for the WAV file
             st.success("Conversion successful!")
@@ -36,5 +44,9 @@ if uploaded_file is not None:
                     file_name="output.wav",
                     mime="audio/wav"
                 )
+
+            # Optional: Play the converted audio
+            st.audio(wav_path, format="audio/wav")
+
         except Exception as e:
             st.error(f"Error during conversion: {e}")
