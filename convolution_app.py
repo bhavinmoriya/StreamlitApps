@@ -13,7 +13,9 @@ st.title("Audio Signal Convolution")
 # Upload two audio files (WAV format)
 st.subheader("Upload two audio signals (WAV files)")
 file1 = st.file_uploader("Signal 1", type=["wav"])
+st.audio("file1.wav", format="audio/wav")
 file2 = st.file_uploader("Signal 2", type=["wav"])
+st.audio("file2.wav", format="audio/wav")
 
 if file1 and file2:
     # Read WAV files
