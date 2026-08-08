@@ -23,7 +23,7 @@ if audio_file:
 
     # Plot original signal and DCT coefficients
     st.subheader("Original Signal and DCT Coefficients")
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6))
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(16, 10))
     ax1.plot(signal, label="Original Signal", color="blue")
     ax1.set_title("Original Audio Signal")
     ax1.set_xlabel("Samples")
@@ -56,7 +56,7 @@ if audio_file:
     reconstructed_signal = reconstructed_signal / np.max(np.abs(reconstructed_signal))
 
     # Plot reconstructed signal
-    fig2, (ax3, ax4) = plt.subplots(2, 1, figsize=(10, 6))
+    fig2, (ax3, ax4) = plt.subplots(2, 1, figsize=(16, 10))
     ax3.plot(signal, label="Original Signal", color="blue", alpha=0.5)
     ax3.plot(reconstructed_signal, label="Reconstructed Signal", color="green")
     ax3.set_title(f"Reconstructed Signal (Top {num_coeffs} DCT Coefficients)")
