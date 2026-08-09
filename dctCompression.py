@@ -16,14 +16,14 @@ if audio_file:
     sample_rate, signal = wavfile.read(audio_file)
     if len(signal.shape) > 1:
         signal = signal[:, 0]  # Convert to mono
-    signal = signal.astype(float) / np.max(np.abs(signal))  # Normalize
+    signal = signal.astype(float) / np.max(np.abs(signal))  # Normalize to float
 
     # Apply DCT
     dct_coeffs = dct(signal)
 
     # Plot original signal and DCT coefficients
     st.subheader("Original Signal and DCT Coefficients")
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(16, 10))
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6))
     ax1.plot(signal, label="Original Signal", color="blue")
     ax1.set_title("Original Audio Signal")
     ax1.set_xlabel("Samples")
@@ -56,7 +56,7 @@ if audio_file:
     reconstructed_signal = reconstructed_signal / np.max(np.abs(reconstructed_signal))
 
     # Plot reconstructed signal
-    fig2, (ax3, ax4) = plt.subplots(2, 1, figsize=(16, 10))
+    fig2, (ax3, ax4) = plt.subplots(2, 1, figsize=(10, 6))
     ax3.plot(signal, label="Original Signal", color="blue", alpha=0.5)
     ax3.plot(reconstructed_signal, label="Reconstructed Signal", color="green")
     ax3.set_title(f"Reconstructed Signal (Top {num_coeffs} DCT Coefficients)")
@@ -84,5 +84,3 @@ if audio_file:
     st.subheader("Listen to the Difference")
     st.audio(signal, sample_rate=sample_rate, format="audio/wav")
     st.audio(reconstructed_signal, sample_rate=sample_rate, format="audio/wav")
-else:
-    st.info("Please upload a WAV file to see DCT in action.")
