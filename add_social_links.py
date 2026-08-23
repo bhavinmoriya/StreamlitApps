@@ -5,16 +5,20 @@ lines_to_add = [
     '\n',
     'linkedin_url = "https://www.linkedin.com/in/bhavin-moriya-ph-d-b0b88b2/"\n',
     'github_url = "https://github.com/bhavinmoriya"\n',
+    'youtube_url = "https://www.youtube.com/@bhavinmoriya9216"\n',
     '\n',
     'st.markdown("## Connect with me")\n',
     '\n',
-    'col1, col2 = st.columns(2)\n',
+    'col1, col2, col3 = st.columns(3)\n',
     '\n',
     'with col1:\n',
     '    st.link_button("🔗 Follow on LinkedIn", linkedin_url)\n',
     '\n',
     'with col2:\n',
     '    st.link_button("💻 Follow on GitHub", github_url)\n',
+    '\n',
+    'with col3:\n',
+    '    st.link_button("🔗 Subscribe on YouTube", youtube_url)\n',
 ]
 
 # Get all .py files in the current directory (excluding this script)
