@@ -1,20 +1,25 @@
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import Ellipse
 
 # Function to plot vectors and transformations
-def plot_svd_transformations(A, x):
+def plot_svd_transformations(A, x, rank):
     # Compute SVD
     U, s, VT = np.linalg.svd(A)
     Sigma = np.diag(s)
+
+    # Rank-1 approximation: Keep only the largest singular value
+    if rank == 1:
+        Sigma_rank = np.diag([s[0], 0])
+    else:
+        Sigma_rank = Sigma
 
     # Construct V from VT
     V = VT.T
 
     # Apply transformations step-by-step
     x_VT = VT @ x
-    x_Sigma_VT = Sigma @ x_VT
+    x_Sigma_VT = Sigma_rank @ x_VT
     x_U_Sigma_VT = U @ x_Sigma_VT
 
     # Create a figure
@@ -38,7 +43,7 @@ def plot_svd_transformations(A, x):
     axs[2].quiver(0, 0, x_Sigma_VT[0], x_Sigma_VT[1], angles='xy', scale_units='xy', scale=1, color='green')
     axs[2].set_xlim(-2, 2)
     axs[2].set_ylim(-2, 2)
-    axs[2].set_title("After $\\Sigma$ (Stretching)")
+    axs[2].set_title(f"After $\\Sigma$ (Stretching, Rank-{rank})")
     axs[2].grid()
 
     # Plot after U (rotation/reflection)
@@ -52,8 +57,8 @@ def plot_svd_transformations(A, x):
     return fig
 
 # Streamlit app
-st.title("SVD Transformation Visualization")
-st.write("This app visualizes the SVD decomposition of a 2x2 matrix as a sequence of rotations and stretching.")
+st.title("SVD Transformation Visualization with Rank Approximation")
+st.write("This app visualizes the SVD decomposition of a 2x2 matrix as a sequence of rotations and stretching, with rank-1 or rank-2 approximation.")
 
 # Input for the matrix A
 st.subheader("Input Matrix A (2x2)")
@@ -71,9 +76,13 @@ x2 = st.number_input("x[1]", value=0.0)
 
 x = np.array([x1, x2])
 
+# Select rank approximation
+st.subheader("Select Rank Approximation")
+rank = st.radio("Rank:", options=[1, 2], index=1)
+
 # Compute and plot SVD transformations
 if st.button("Visualize SVD Transformations"):
-    fig = plot_svd_transformations(A, x)
+    fig = plot_svd_transformations(A, x, rank)
     st.pyplot(fig)
 
     # Display SVD components
@@ -82,3 +91,12 @@ if st.button("Visualize SVD Transformations"):
     st.write(f"$U$ (Rotation Matrix):\n {U}")
     st.write(f"$\\Sigma$ (Stretching Matrix):\n {np.diag(s)}")
     st.write(f"$V^T$ (Rotation Matrix):\n {VT}")
+
+    # Display rank-approximated matrix
+    if rank == 1:
+        A_rank1 = U @ np.diag([s[0], 0]) @ VT
+        st.subheader("Rank-1 Approximation of A")
+        st.write(A_rank1)
+    else:
+        st.subheader("Full Rank (Rank-2) Approximation of A")
+        st.write(A)
