@@ -3,6 +3,7 @@ import pandas as pd
 import yfinance as yf
 import streamlit as st
 import matplotlib.pyplot as plt
+plt.style.use("ggplot")
 from datetime import date, timedelta
 
 
