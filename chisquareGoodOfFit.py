@@ -117,7 +117,8 @@ st.bar_chart(chart_data, x="Category", y=["Observed", "Expected"])
 with st.expander("Chi-Square distribution & test statistic"):
     x = np.linspace(0, max(chi2_stat, critical_value) * 1.5, 300)
     density = chi2.pdf(x, dof)
-    st.line_chart({"χ² distribution": density}, x=x, height=250)
+    dist_data = {"x": x, "χ² density": density}
+    st.line_chart(dist_data, x="x", y="χ² density", height=250)
     st.markdown(
         f"- Dashed reference: critical value = **{critical_value:.4f}** at α = {alpha:.2f}\n"
         f"- Test statistic: **{chi2_stat:.4f}** "
