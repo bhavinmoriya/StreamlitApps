@@ -10,32 +10,77 @@ st.caption("Check whether two categorical variables are related, from a continge
 
 # ---------- Input ----------
 st.subheader("Contingency Table")
+
 row_labels_raw = st.text_input(
     "Row labels (optional)",
     value="Male, Female",
-    help="Comma-separated labels for each row. Leave blank for Row 1, Row 2, ..."
+    help="Comma-separated labels, one per row. Extra rows get automatic labels (Row 3, ...)."
 )
 col_labels_raw = st.text_input(
     "Column labels (optional)",
     value="Buy, No Buy",
-    help="Comma-separated labels for each column. Leave blank for Col 1, Col 2, ..."
+    help="Comma-separated labels, one per column. Extra columns get automatic labels (Col 3, ...)."
 )
 
-row_labels = [s.strip() for s in row_labels_raw.split(",") if s.strip()]
-col_labels = [s.strip() for s in col_labels_raw.split(",") if s.strip()]
+row_labels_in = [s.strip() for s in row_labels_raw.split(",") if s.strip()]
+col_labels_in = [s.strip() for s in col_labels_raw.split(",") if s.strip()]
 
-default_table = pd.DataFrame(
-    [[30, 10], [20, 40]],
-    index=row_labels or None,
-    columns=col_labels or None,
-)
+# ---------- Table state (persists across reruns) ----------
+if "cont_table" not in st.session_state:
+    st.session_state.cont_table = pd.DataFrame(
+        [[30, 10], [20, 40]],
+        index=["Male", "Female"],
+        columns=["Buy", "No Buy"],
+    )
+
+def pad_labels(labels, n, prefix):
+    return [labels[i] if i < len(labels) else f"{prefix} {i + 1}" for i in range(n)]
+
+def relabel(df):
+    df = df.copy()
+    df.index = pad_labels(row_labels_in, len(df), "Row")
+    df.columns = pad_labels(col_labels_in, len(df.columns), "Col")
+    return df
+
+c_add_row, c_del_row, c_add_col, c_del_col, _ = st.columns([1, 1, 1, 1, 2.2])
+
+with c_add_row:
+    if st.button("➕ Row", help="Add a row at the bottom"):
+        st.session_state.cont_table = relabel(st.session_state.cont_table)
+        st.session_state.cont_table.loc[f"Row {len(st.session_state.cont_table) + 1}"] = 0.0
+        st.rerun()
+
+with c_del_row:
+    if st.button("➖ Row", help="Remove the last row") and len(st.session_state.cont_table) > 2:
+        st.session_state.cont_table = st.session_state.cont_table.iloc[:-1]
+        st.rerun()
+
+with c_add_col:
+    if st.button("➕ Column", help="Add a column on the right"):
+        st.session_state.cont_table = relabel(st.session_state.cont_table)
+        st.session_state.cont_table[f"Col {st.session_state.cont_table.shape[1] + 1}"] = 0.0
+        st.rerun()
+
+with c_del_col:
+    if st.button("➖ Column", help="Remove the last column") and st.session_state.cont_table.shape[1] > 2:
+        st.session_state.cont_table = st.session_state.cont_table.iloc[:, :-1]
+        st.rerun()
+
+if st.button("↺ Reset table", help="Restore the 2×2 example"):
+    st.session_state.cont_table = pd.DataFrame(
+        [[30, 10], [20, 40]],
+        index=["Male", "Female"],
+        columns=["Buy", "No Buy"],
+    )
+    st.rerun()
 
 table = st.data_editor(
-    default_table,
-    num_rows="dynamic",
+    st.session_state.cont_table,
+    num_rows="fixed",
     use_container_width=True,
     key="contingency_editor",
 )
+st.session_state.cont_table = table
 
 alpha = st.slider(
     "Significance level (α)",
