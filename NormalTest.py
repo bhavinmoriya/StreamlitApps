@@ -193,8 +193,16 @@ with res_col:
             return ["color: #b3261e"] * 5
         return [""] * 5
 
+    def fmt_stat(v):
+        return f"{v:.4f}" if isinstance(v, (int, float)) and not pd.isna(v) else str(v)
+
+    def fmt_p(v):
+        if isinstance(v, (int, float)) and not pd.isna(v):
+            return f"{v:.4g}" if v >= 1e-4 else f"{v:.2e}"
+        return str(v)
+
     styled = results.style.apply(color_row, axis=1).format(
-        {"Statistic": "{:.4f}", "p-value": "{:.4g}"}
+        {"Statistic": fmt_stat, "p-value": fmt_p}
     )
     st.dataframe(styled, use_container_width=True)
 
