@@ -3,67 +3,50 @@ import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
 import scipy.stats as stats
-from scipy import special
 
 st.set_page_config(page_title="Normality Testing Dashboard", layout="wide", page_icon="📊")
 
 # ----------------------------- Helpers -----------------------------
 
-@st.cache_data
-def lilliefors_critical(n, alpha):
-    """Lilliefors (1967) critical values for the KS normality test, with interpolation."""
-    table = {
-        0.20: [0.736, 0.768, 0.805, 0.886, 0.941, 0.975],
-        0.15: [0.768, 0.802, 0.841, 0.926, 0.988, 1.024],
-        0.10: [0.805, 0.841, 0.886, 0.977, 1.041, 1.081],
-        0.05: [0.886, 0.926, 0.977, 1.078, 1.147, 1.191],
-        0.01: [1.031, 1.078, 1.138, 1.253, 1.335, 1.387],
-    }
-    ngrid = [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-             25, 30, np.inf]
-    crit = None
-    if alpha in table:
-        # Dallal-Wilkinson style power-law fit (same approach statsmodels uses)
-        pw = np.log(np.array(ngrid[:-1]))
-        cw = np.log(np.array(table[alpha][:-1]) / np.array(ngrid[:-1]))
-        m, c = np.polyfit(pw, cw, 1)
-        crit = float(np.exp(c) * n ** m)
-    return crit
+@st.cache_data(show_spinner="Running Lilliefors Monte Carlo simulation…")
+def lilliefors_null_dist(n, n_sim=2000, seed=42):
+    """Monte Carlo distribution of the Lilliefors statistic under H0.
+
+    For each simulated standard-normal sample of size n, standardise it with its
+    own mean and std (that is what makes this the Lilliefors test, not plain KS)
+    and record the max ECDF deviation. Cached per sample size.
+    """
+    rng = np.random.default_rng(seed)
+    sims = rng.standard_normal((n_sim, n))
+    sims = (sims - sims.mean(axis=1, keepdims=True)) / sims.std(axis=1, ddof=1, keepdims=True)
+    sims = np.sort(sims, axis=1)
+    cdf = stats.norm.cdf(sims)
+    i = np.arange(1, n + 1) / n
+    j = np.arange(0, n) / n
+    d = np.maximum((cdf - i).max(axis=1), (cdf - j).max(axis=1))
+    return d
 
 
 def lilliefors_test(x, alpha=0.05):
-    """Lilliefors-corrected KS test for normality (mean & variance estimated from data)."""
+    """Lilliefors-corrected KS test for normality (mean & variance estimated from data).
+
+    Returns (statistic, p-value, critical value). p-value and critical value are
+    obtained from a Monte Carlo null distribution, which is accurate for any n.
+    """
     x = np.sort(np.asarray(x, dtype=float))
     n = len(x)
-    z = (x - x.mean()) / (x.std(ddof=1) if x.std(ddof=1) > 0 else 1e-12)
+    sd = x.std(ddof=1)
+    z = (x - x.mean()) / (sd if sd > 0 else 1e-12)
     cdf = stats.norm.cdf(z)
     ecdf_hi = np.arange(1, n + 1) / n
     ecdf_lo = np.arange(0, n) / n
     d = max(np.max(np.abs(cdf - ecdf_hi)), np.max(np.abs(cdf - ecdf_lo)))
-    crit = lilliefors_critical(n, alpha)
-    p = lilliefors_pvalue_approx(d, n)
+
+    null = lilliefors_null_dist(n)
+    p = float((null >= d).mean())
+    p = max(p, 1.0 / (len(null) + 1))          # avoid p = 0
+    crit = float(np.quantile(null, 1 - alpha))
     return d, p, crit
-
-
-@st.cache_data
-def lilliefors_pvalue_approx(d, n):
-    """Approximate p-value using the Dallal-Wilkinson / normal approximation."""
-    if n > 100:
-        result = d * (np.sqrt(n) - 0.01 + 0.85 / np.sqrt(n))
-        if result <= 0.4:
-            return 1.0
-        return min(1.0, 2.0 * (1.0 - stats.norm.cdf(result)))
-    # for small n: use simulated tables approximation (Molin & Abadi)
-    # fall back to a simple interpolation on known critical points
-    grid = [0.01, 0.05, 0.10, 0.15, 0.20]
-    crits = [lilliefors_critical(n, a) for a in grid]
-    if crits[0] is None or any(c is None for c in crits):
-        return None
-    if d >= crits[0]:
-        return 0.01
-    if d < crits[-1]:
-        return 0.20
-    return float(np.interp(d, list(reversed(crits)), list(reversed(grid))))
 
 
 def run_all_tests(x, alpha=0.05):
@@ -82,14 +65,12 @@ def run_all_tests(x, alpha=0.05):
     results.append({
         "Test": "Kolmogorov-Smirnov (Lilliefors)",
         "Statistic": d,
-        "p-value": None if p is None else p,
-        "Critical value": "—" if crit is None else f"{crit:.4f}",
-        f"Normal at α={alpha}": "—" if crit is None else ("Yes" if d <= crit else "No"),
+        "p-value": p,
+        "Critical value": f"{crit:.4f}",
+        f"Normal at α={alpha}": "Yes" if d <= crit else "No",
     })
     # Anderson-Darling
     ad = stats.anderson(x, dist="norm")
-    idx = min(int(round(alpha * 100)) - 1, len(ad.critical_values) - 1)
-    sig_idx = {10: 2, 5: 3, 2.5: 4, 1: 4}
     # significance levels for normal dist: 15, 10, 5, 2.5, 1
     levels = {15: 0, 10: 1, 5: 2, 2.5: 3, 1: 4}
     lvl = min(levels.keys(), key=lambda k: abs(k - alpha * 100))
