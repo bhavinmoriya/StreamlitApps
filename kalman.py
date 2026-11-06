@@ -12,11 +12,17 @@ st.set_page_config(page_title="Kalman Filter Intro", page_icon="📊", layout="w
 # ----------------------------- Kalman filter -----------------------------
 
 @st.cache_data
-def simulate(true_value_fn, n_steps, noise_std, seed):
+def simulate(signal_choice, n_steps, noise_std, seed):
     """Generate a noisy measurement series from a known true signal."""
+    if signal_choice == "constant":
+        true_fn = lambda t: np.ones_like(t, dtype=float) * 1.0
+    elif signal_choice == "sine":
+        true_fn = lambda t: np.sin(t / 12.0) * 2.0
+    else:  # ramp
+        true_fn = lambda t: t * 0.02
     rng = np.random.default_rng(seed)
     t = np.arange(n_steps)
-    true = true_value_fn(t)
+    true = true_fn(t)
     measurements = true + rng.normal(0, noise_std, size=n_steps)
     return t, true, measurements
 
@@ -85,14 +91,9 @@ signal_choice = st.radio(
     horizontal=True,
 )
 
-if signal_choice.startswith("Constant"):
-    true_fn = lambda t: np.ones_like(t, dtype=float) * 1.0
-elif signal_choice == "Sine wave":
-    true_fn = lambda t: np.sin(t / 12.0) * 2.0
-else:
-    true_fn = lambda t: t * 0.02
+signal_key = {"Constant value (classic demo)": "constant", "Sine wave": "sine", "Ramp (drift)": "ramp"}[signal_choice]
 
-t, true, meas = simulate(true_fn, n_steps, noise_std, seed)
+t, true, meas = simulate(signal_key, n_steps, noise_std, seed)
 
 if use_auto_init:
     est_init = meas[0]
